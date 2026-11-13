@@ -1,5 +1,7 @@
 # Order 03: days and spaces in `parseDuration`
 
+Issue: #3
+
 File to change: `src/duration.js` (and `test/duration.test.js`). Touch nothing else.
 
 ## Problem

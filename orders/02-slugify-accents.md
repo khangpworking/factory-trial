@@ -1,5 +1,7 @@
 # Order 02: accented letters and a length limit in `slugify`
 
+Issue: #2
+
 File to change: `src/slugify.js` (and `test/slugify.test.js`). Touch nothing else.
 
 ## Problem
