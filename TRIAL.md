@@ -154,3 +154,22 @@ Config changes made for this phase:
 
 Recorded usage: 6 runs (4 order runs, 1 poll, 1 delivery). Tokens and cost: not reported; the ACP plugin has no
 usage reporting, so agent-autoloop shows "Token 没上报 · 费用没上报" for all 6.
+
+## Results: factory line live check (13/11/2026)
+
+The factory wiring (`~/factory-trial/autoloop/factory`, rules generated from `factory.config.json`) ran against the
+real hub with qodercli and opencode builders, the qodercli reviewer, and MausBot Lead. Health ran on demand
+(`health.run`); its 10-minute cron was left out for the session.
+
+| Item | Result | Evidence |
+|---|---|---|
+| Order 02 adopted (`order.built`) | pass, no fix round | review run 7 approved (reviewer now sees the brief and review points), land 8, record 9: `56b4401`, issue #2 closed |
+| Fix rounds in one session | pass | order 04: build 10, review 11 finds an operator-planted defect, fix 12, review 13 one more finding, fix 14, review 15 approved, land 16, record 17: `b2ac288`. Runs 10/12/14 share one qoder session. Hops 0 to 7 |
+| Order 03 (opencode branch, 7 commits behind) | pass | review 18 approved, land 19: `wt merge` rebased onto main and ran `npm test` in pre-merge, `be800da`, issue #3 closed |
+| Serial landings, push, record | pass (not contended) | 3 factory landings at different times, all pushed, worktrees and branches removed, 3 `jev-route outcome` records |
+| Lead escalation | pass in part | run 21 lost Lead's question (bridge bug, fixed); run 22 in the same MausBot conversation made card #2; the answering run was cancelled to stay within the two-run Lead budget |
+| Red main | pass | two regressions pushed to main (`db33528`, `483bff0`); each time one fault, one repair brief with the failing output, one qoder repair that landed (`774ec86`, `029990f`) in about 50 s; a second sample while red emitted nothing; recovery once, then silence |
+| Blocked agent | pass in part | a pane already blocked, read only, threshold 1 min: one notice, no model call, nothing on the next sample |
+| Stale worktrees | pass | clean landed worktree removed and cleared on the next sample; dirty one kept |
+
+Seven bugs in the factory scripts were fixed and covered by offline tests (24 pass). Details are in the factory README.
