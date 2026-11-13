@@ -8,7 +8,12 @@ export function formatPrice(cents, currency = "USD") {
   if (symbol === undefined) {
     throw new RangeError(`unsupported currency: ${currency}`);
   }
-  const whole = Math.floor(cents / 100);
-  const fraction = String(cents % 100).padStart(2, "0");
-  return `${symbol}${whole}.${fraction}`;
+  const sign = cents < 0 ? "-" : "";
+  const absolute = Math.abs(cents);
+  const whole = String(Math.floor(absolute / 100)).replace(
+    /\B(?=(\d{3})+(?!\d))/g,
+    ",",
+  );
+  const fraction = String(absolute % 100).padStart(2, "0");
+  return `${sign}${symbol}${whole}.${fraction}`;
 }
