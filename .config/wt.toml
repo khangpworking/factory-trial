@@ -1,0 +1,10 @@
+# worktrunk project hooks. Syntax: worktrunk v0.81.0 docs (hook.md, config.md).
+
+# Blocking create-time hook: runs in the new worktree before `wt switch --create` returns.
+# Each branch gets a stable port in 10000-19999 from the hash_port filter.
+[pre-start]
+env = "echo PORT={{ branch | hash_port }} > .env"
+
+# Runs during `wt merge` after the rebase and before the fast-forward; a failure aborts the merge.
+[pre-merge]
+test = "npm test"

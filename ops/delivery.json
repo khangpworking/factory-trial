@@ -1,0 +1,6 @@
+{
+  "repo": "khangpworking/factory-trial",
+  "internal": ["docs/**/*.md", "orders/*.md", "TRIAL.md", "README.md"],
+  "check": { "workflow": "check.yml", "job": "check" },
+  "review": { "points": "AGENTS.md", "status": "agent-review" }
+}

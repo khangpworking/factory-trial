@@ -1,0 +1,13 @@
+{
+  "name": "factory-trial-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Throwaway project for the code-factory trial. Zero dependencies.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

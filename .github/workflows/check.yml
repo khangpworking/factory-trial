@@ -1,0 +1,24 @@
+name: check
+
+# ready_for_review is required by agent-autoloop's delivery pipeline: after a draft turns ready it only
+# accepts a check run started after that point (skills/agent-autoloop/SKILL.md, v1.8.3).
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # The job name must match "check.job" in ops/delivery.json.
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - run: npm test
