@@ -120,3 +120,37 @@ Without a `health` block the receipt says merged only ("已合并；项目没有
 - Failing test committed in order-demo: `wt merge` printed `✗ pre-merge project:test failed (exit code 1)`, exit 1, main unchanged.
 - After the fix: `wt merge` squashed 2 commits, ran pre-merge, `✓ Merged to main (1 commit, 1 file, +4)`, removed the worktree and branch. That demo merge was later dropped so `main` holds only the baseline commit.
 - `herdr worktree list --cwd ~/factory-trial/app` lists wt-made worktrees.
+
+## Results (2026-11-13)
+
+Agents under test: qodercli 1.1.79 (DeepSeek-Flash, reasoning effort high) and opencode 1.19.4
+(opencode/deepseek-v4.1-flash-free, effort high), both over ACP (`use: "acp"`). Claude and Codex were not used.
+Hub keys were regenerated (data dir wiped, `init --no-service` again) before the hub started.
+
+| Criterion | Result | Key evidence |
+|---|---|---|
+| 1. ask, suspend, answer, resume (qoder) | pass | Run 1 (`order.qoder.ask`, orders/02) ended with card #1 (two options) in 18 s. While the card was open, 0 qodercli/opencode/bridge processes. `agent-autoloop answer 1 1`. Run 2 (`card.answered`) used the same session `61c7d87a…` (`why 1` / `why 2`, status JSON), the same worktree `order-02-slugify-accents-185ae5`, and qoder stored that session under the worktree's project folder. Run 2 committed `8219623`, 16 tests pass. |
+| 2. kill mid-run | pass | Runs 3 and 4 claimed and running (sessions known), `kill -9` of the `up` process at 10:36:13; the 7 bridge/proxy/agent processes kept running (own process groups). `up` restarted 10:36:22; each run was handed in once ("run 3: done", "run 4: done"); 4 runs total, each event recorded once, no re-dispatch. |
+| 3. two parallel orders, two worktrees (qoder + opencode) | pass | Run 3 qoder orders/01 and run 4 opencode orders/03 started in the same second. `order-01-price-negative-cd28fe` PORT=13492, commit touching only `src/price.js`, `test/price.test.js`, 11 tests pass; `order-03-duration-days-f0f8f7` PORT=11454, commit touching only `src/duration.js`, `test/duration.test.js`, 13 tests pass. All acceptance checks of orders 01-03 hold. |
+| 4. delivery pipeline | pass | PR #4 (order 01, rebased on main) labelled `deliver`; poll run 5 emitted the event, delivery run 6 reviewed with the qodercli reviewer (round 1: no findings, ledger in the PR body), waited for `check` (pull_request, success), squash-merged as `2650283`, closed issue #1. Statuses: `agent-review` success, `delivery` success "已合并；项目没有线上服务". |
+
+Permission behaviour under `access: edit` (risk check):
+
+- qoder asks over ACP for edits and some commands. The bridge allowed reads and edits inside the worktree and
+  rejected one `node -e …` command (`reject_once`, qoder option `cancel`); qoder carried on, no hang. qoder ran
+  `npm test`, `git add` and `git commit` without asking (its own safe-command handling), and committing inside a
+  worktree worked.
+- opencode never sent a permission request: it ran bash, writes and edits on its own defaults. `edit` access is not
+  enforced for opencode by agent-autoloop; only opencode's own permission config would limit it.
+
+Config changes made for this phase:
+
+- Agents `qoder` and `opencode`: `use: "acp"`, `timeout: 30`, `command` = `node ~/factory-trial/autoloop/acp-in-worktree.mjs --set <effort option>=high -- <agent ACP command>` (qoder also gets `-m DeepSeek-Flash --reasoning-effort high`).
+- Rules `order-qoder` (`order.qoder`, `order.qoder.ask`) and `order-opencode` (`order.opencode`, `order.opencode.ask`), cwd `~/factory-trial/app`, group `orders`, parallel 2. The `.ask` type makes the agent ask first.
+- `acp-in-worktree.mjs` (workaround, not a supported feature): the ACP plugin ignores `program`, starts `command` with the rule's cwd, sends that cwd in session/new and session/load, and approves edits only inside it. The proxy creates or reuses the worktree for the event subject, starts the agent there, rewrites the cwd in those requests, maps worktree paths to the rule cwd in permission requests (main-checkout paths map outside, so they are refused), and sets effort high through `session/set_config_option` (opencode's ACP session starts at `low`).
+- `ops/delivery.json`: `review.command` runs `review-qoder.mjs` (qodercli, all tools disabled, diff inline, prints `{"findings":[…]}`), so the default Codex reviewer is never started.
+- For criterion 4 the rules temporarily added `delivery-poll` (cron */2, `gh` only) and `delivery`; afterwards the live rules went back to the two order rules (no cron).
+- Adding `origin` changed worktrunk's project id, so hook approvals had to be granted again (`wt config approvals add --yes`). Without them `wt` refuses in a non-interactive run ("Cannot prompt for approval").
+
+Recorded usage: 6 runs (4 order runs, 1 poll, 1 delivery). Tokens and cost: not reported; the ACP plugin has no
+usage reporting, so agent-autoloop shows "Token 没上报 · 费用没上报" for all 6.
