@@ -1,4 +1,5 @@
 // Reads the quantity from a product label such as "3 pcs", "2 x 500g" or "box of 12".
+// Returns null when the label carries no quantity at all.
 export function parseQty(label) {
   if (typeof label !== "string") {
     throw new TypeError("label must be a string");
@@ -29,5 +30,5 @@ export function parseQty(label) {
     out.size = Number(size[1]);
     out.unit = size[2];
   }
-  return out;
+  return Object.keys(out).length ? out : null;
 }
