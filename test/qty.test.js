@@ -18,8 +18,9 @@ test("reads a single size", () => {
   assert.deepEqual(parseQty("Milk 180ml"), { size: 180, unit: "ml" });
 });
 
-test("label without a quantity", () => {
-  assert.deepEqual(parseQty("Apple"), {});
+test("label without a quantity is null", () => {
+  assert.equal(parseQty("Apple"), null);
+  assert.equal(parseQty("Fresh basil"), null);
 });
 
 test("rejects non-strings", () => {
