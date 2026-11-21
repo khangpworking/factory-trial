@@ -1,0 +1,13 @@
+export function snakeCase(text) {
+  if (typeof text !== "string") {
+    throw new TypeError("text must be a string");
+  }
+  if (text.length === 0) {
+    return "";
+  }
+
+  return text
+    .split(" ")
+    .map((word) => word.toLowerCase())
+    .join("_");
+}
