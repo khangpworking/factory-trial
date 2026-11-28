@@ -10,6 +10,7 @@ This is a throwaway trial project. Keep changes small.
 - Work only on the files your order names. Do not touch `ops/`, `.github/`, `.config/` or `AGENTS.md`.
 - Add a test for every behaviour you add or change. Do not weaken or delete existing tests.
 - Each worktree has its own `.env` with a `PORT`; never commit `.env`.
+- `RISK.md` lists the protected paths of this project; the factory reads it from `main` before every review.
 - If an order is unclear, ask the owner instead of guessing.
 
 <!--
